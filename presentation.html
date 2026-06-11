@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>📘 English Revision | Interactive Tasks (Hide Answers)</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+            background: #eef2f9;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .slides-container {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fbff 100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.45s ease, visibility 0.45s;
+            overflow-y: auto;
+            padding: 2rem 2.5rem;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        /* scrollbar */
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+        .slide::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .slide::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            background: linear-gradient(135deg, #1e3c72, #2b9e8f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+        h2 {
+            font-size: 1.9rem;
+            color: #0f2b3d;
+            border-left: 7px solid #2b9e8f;
+            padding-left: 1.1rem;
+            margin: 0.8rem 0 1.2rem 0;
+        }
+        h3 {
+            font-size: 1.3rem;
+            color: #1e4b6e;
+            margin: 0.5rem 0 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .task-card {
+            background: white;
+            border-radius: 32px;
+            padding: 1.3rem 1.8rem;
+            margin: 1.2rem 0;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+            border: 1px solid #e2edff;
+            transition: 0.2s;
+        }
+        .icon-badge {
+            background: #eef2ff;
+            border-radius: 40px;
+            padding: 5px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2563eb;
+            margin-bottom: 12px;
+        }
+        .quiz-item {
+            background: #f9fafc;
+            padding: 12px 18px;
+            margin: 10px 0;
+            border-radius: 24px;
+            border-left: 4px solid #2b9e8f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .quiz-text {
+            font-weight: 500;
+            flex: 1;
+        }
+        .btn-reveal {
+            background: #e2e8f0;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #1e4b6e;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .btn-reveal:hover {
+            background: #2b9e8f;
+            color: white;
+        }
+        .answer-hidden {
+            display: none;
+            background: #d9f0ec;
+            border-radius: 28px;
+            padding: 6px 16px;
+            font-weight: 600;
+            color: #0c5e4a;
+            margin-left: 12px;
+        }
+        .answer-visible {
+            display: inline-block;
+        }
+        .flex-vocab {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 1rem 0;
+        }
+        .vocab-chip {
+            background: #e6f0ff;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #075985;
+        }
+        .decor-line {
+            height: 4px;
+            width: 60px;
+            background: #2b9e8f;
+            border-radius: 4px;
+            margin: 10px 0 15px 0;
+        }
+        button.nav {
+            position: fixed;
+            bottom: 24px;
+            background: #1e4b6e;
+            color: white;
+            border: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 60px;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button.nav:hover { background: #2b9e8f; transform: scale(1.05); }
+        #prevBtn { left: 24px; }
+        #nextBtn { right: 24px; }
+        .page-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f2b3dcc;
+            backdrop-filter: blur(8px);
+            padding: 6px 24px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            z-index: 30;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 700px) {
+            .slide { padding: 1.5rem; }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="slides-container" id="slidesContainer">
+    <!-- SLIDE 1: intro -->
+    <div class="slide active" id="slide0">
+        <div style="display: flex; flex-direction: column; justify-content: center; min-height: 85%;">
+            <div class="icon-badge"><i class="fas fa-chalkboard-user"></i> ✨ Interactive Revision</div>
+            <h1><i class="fas fa-language"></i> English Booster</h1>
+            <p style="font-size: 1.2rem;">Grammar & vocabulary tasks · Click <strong>“Check”</strong> to see the answer</p>
+            <div class="task-card">
+                <h3><i class="fas fa-list-check"></i> What's inside?</h3>
+                <ul style="margin-left: 1.5rem; line-height: 1.9;">
+                    <li><i class="fas fa-building"></i> There is/are + some/any/a lot of</li>
+                    <li><i class="fas fa-eye"></i> See · Look · Watch</li>
+                    <li><i class="fas fa-home"></i> House & furniture + articles</li>
+                    <li><i class="fas fa-backpack"></i> Need + noun / need + infinitive</li>
+                    <li><i class="fas fa-umbrella-beach"></i> Travel items & opposites</li>
+                </ul>
+            </div>
+            <div class="decor-line"></div>
+            <p><i class="fas fa-arrow-right"></i> Use <strong>← →</strong> arrows or buttons below</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: There is/are quantifiers -->
+    <div class="slide" id="slide1">
+        <h2><i class="fas fa-map-pin"></i> Task 1: There is / are & some/any/a lot of</h2>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-pencil-alt"></i> Complete with: is, are, some, any, a, an</div>
+            <div class="quiz-item"><span class="quiz-text">1. There ___ a big park near my house.</span> <button class="btn-reveal" data-answer="is">Check answer</button><span class="answer-hidden">is</span></div>
+            <div class="quiz-item"><span class="quiz-text">2. There aren't ___ supermarkets in this village.</span> <button class="btn-reveal" data-answer="any">Check answer</button><span class="answer-hidden">any</span></div>
+            <div class="quiz-item"><span class="quiz-text">3. There ___ ___ lovely flowers in the garden.</span> <button class="btn-reveal" data-answer="are some">Check answer</button><span class="answer-hidden">are some</span></div>
+            <div class="quiz-item"><span class="quiz-text">4. Is there ___ bus station?</span> <button class="btn-reveal" data-answer="a">Check answer</button><span class="answer-hidden">a</span></div>
+            <div class="quiz-item"><span class="quiz-text">5. There are ___ lot of tourists every summer.</span> <button class="btn-reveal" data-answer="a">Check answer</button><span class="answer-hidden">a</span></div>
+        </div>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-times-circle"></i> Correct the mistakes</div>
+            <div class="quiz-item"><span class="quiz-text">✏️ "There are a lot of some shops." → </span><button class="btn-reveal" data-answer="There are a lot of shops.">Check</button><span class="answer-hidden">There are a lot of shops.</span></div>
+            <div class="quiz-item"><span class="quiz-text">✏️ "There isn’t a some hospital." → </span><button class="btn-reveal" data-answer="There isn’t a hospital.">Check</button><span class="answer-hidden">There isn’t a hospital.</span></div>
+            <div class="quiz-item"><span class="quiz-text">✏️ "There are any nice cafes?" → </span><button class="btn-reveal" data-answer="Are there any nice cafes?">Check</button><span class="answer-hidden">Are there any nice cafes?</span></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: See / Look / Watch -->
+    <div class="slide" id="slide2">
+        <h2><i class="fas fa-eye"></i> See / Look / Watch</h2>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-fill-drip"></i> Fill in the blanks</div>
+            <div class="quiz-item"><span class="quiz-text">1. Can you ___ the stars tonight?</span><button class="btn-reveal" data-answer="see">Check</button><span class="answer-hidden">see</span></div>
+            <div class="quiz-item"><span class="quiz-text">2. Please ___ at the blackboard carefully.</span><button class="btn-reveal" data-answer="look">Check</button><span class="answer-hidden">look</span></div>
+            <div class="quiz-item"><span class="quiz-text">3. I love to ___ football matches on TV.</span><button class="btn-reveal" data-answer="watch">Check</button><span class="answer-hidden">watch</span></div>
+            <div class="quiz-item"><span class="quiz-text">4. She ___ her phone every morning for news.</span><button class="btn-reveal" data-answer="looks at">Check</button><span class="answer-hidden">looks at</span></div>
+            <div class="quiz-item"><span class="quiz-text">5. Did you ___ that bird? It was amazing!</span><button class="btn-reveal" data-answer="see">Check</button><span class="answer-hidden">see</span></div>
+        </div>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-check-double"></i> Choose the correct word</div>
+            <div class="quiz-item"><span class="quiz-text">📺 “We decided to (see / watch) a documentary about oceans.”</span><button class="btn-reveal" data-answer="watch">Check</button><span class="answer-hidden">watch</span></div>
+            <div class="quiz-item"><span class="quiz-text">👀 “(Look / Watch) to the right before crossing.”</span><button class="btn-reveal" data-answer="Look">Check</button><span class="answer-hidden">Look</span></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: Homes furniture & articles -->
+    <div class="slide" id="slide3">
+        <h2><i class="fas fa-couch"></i> Homes & furniture</h2>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-puzzle-piece"></i> Match the furniture to the room</div>
+            <div class="flex-vocab">
+                <span class="vocab-chip">🛏️ bed → ?</span>
+                <span class="vocab-chip">🍳 stove → ?</span>
+                <span class="vocab-chip">🛁 shower → ?</span>
+                <span class="vocab-chip">🪑 armchair → ?</span>
+                <span class="vocab-chip">🚪 wardrobe → ?</span>
+            </div>
+            <div class="quiz-item"><button class="btn-reveal" data-answer="bedroom">Show answers (bed)</button><span class="answer-hidden">bedroom</span>   
+            <button class="btn-reveal" data-answer="kitchen">Show (stove)</button><span class="answer-hidden">kitchen</span>   
+            <button class="btn-reveal" data-answer="bathroom">Show (shower)</button><span class="answer-hidden">bathroom</span>   
+            <button class="btn-reveal" data-answer="living room">Show (armchair)</button><span class="answer-hidden">living room</span>   
+            <button class="btn-reveal" data-answer="bedroom">Show (wardrobe)</button><span class="answer-hidden">bedroom</span>
+            </div>
+        </div>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-article"></i> Articles: a / an / the / (no article)</div>
+            <div class="quiz-item"><span class="quiz-text">1. We need to buy ___ new sofa.</span><button class="btn-reveal" data-answer="a">Check</button><span class="answer-hidden">a</span></div>
+            <div class="quiz-item"><span class="quiz-text">2. ___ kitchen is very modern. (specific)</span><button class="btn-reveal" data-answer="The">Check</button><span class="answer-hidden">The</span></div>
+            <div class="quiz-item"><span class="quiz-text">3. She keeps her clothes in ___ wardrobe.</span><button class="btn-reveal" data-answer="a">Check</button><span class="answer-hidden">a</span></div>
+            <div class="quiz-item"><span class="quiz-text">4. I love ___ nature. (general)</span><button class="btn-reveal" data-answer="(no article)">Check</button><span class="answer-hidden">(no article)</span></div>
+            <div class="quiz-item"><span class="quiz-text">5. There's ___ old cupboard in the hall.</span><button class="btn-reveal" data-answer="an">Check</button><span class="answer-hidden">an</span></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: need + noun / need + to -->
+    <div class="slide" id="slide4">
+        <h2><i class="fas fa-toolbox"></i> Need + noun / need + infinitive</h2>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-clipboard-list"></i> Write the correct form</div>
+            <div class="quiz-item"><span class="quiz-text">🌵 In the desert, you ________ (water) every day.</span><button class="btn-reveal" data-answer="need water (noun)">Check</button><span class="answer-hidden">need water (noun)</span></div>
+            <div class="quiz-item"><span class="quiz-text">🏔️ We ________ (take) warm jackets. It’s freezing.</span><button class="btn-reveal" data-answer="need to take">Check</button><span class="answer-hidden">need to take</span></div>
+            <div class="quiz-item"><span class="quiz-text">📱 She ________ (charge) her phone before the trip.</span><button class="btn-reveal" data-answer="needs to charge">Check</button><span class="answer-hidden">needs to charge</span></div>
+            <div class="quiz-item"><span class="quiz-text">🎒 I ________ (a backpack) for the hike.</span><button class="btn-reveal" data-answer="need a backpack">Check</button><span class="answer-hidden">need a backpack</span></div>
+        </div>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-thumbs-down"></i> Negative form: don't/doesn't need</div>
+            <div class="quiz-item"><span class="quiz-text">❄️ It's hot today. You ________ (warm clothes).</span><button class="btn-reveal" data-answer="don't need warm clothes">Check</button><span class="answer-hidden">don't need warm clothes</span></div>
+            <div class="quiz-item"><span class="quiz-text">🌙 He ________ (wake up) early tomorrow. Holiday.</span><button class="btn-reveal" data-answer="doesn't need to wake up">Check</button><span class="answer-hidden">doesn't need to wake up</span></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: Travel items vocabulary -->
+    <div class="slide" id="slide5">
+        <h2><i class="fas fa-umbrella-beach"></i> Travel & survival items</h2>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-tags"></i> What do you need? (choose & check)</div>
+            <div class="quiz-item"><span class="quiz-text">🏕️ You go camping. Name 4 things:</span><button class="btn-reveal" data-answer="knife, blanket, water bottle, map">Check idea</button><span class="answer-hidden">knife, blanket, water bottle, map</span></div>
+            <div class="quiz-item"><span class="quiz-text">🏖️ At the beach on sunny day:</span><button class="btn-reveal" data-answer="sunglasses, swimsuit, sunbathing cream">Check</button><span class="answer-hidden">sunglasses, swimsuit, sunbathing cream</span></div>
+        </div>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-sync-alt"></i> Fill in: need / needs</div>
+            <div class="quiz-item"><span class="quiz-text">She _______ (need) warm socks for the mountains.</span><button class="btn-reveal" data-answer="needs">Check</button><span class="answer-hidden">needs</span></div>
+            <div class="quiz-item"><span class="quiz-text">We _______ (need) a map to find the trail.</span><button class="btn-reveal" data-answer="need">Check</button><span class="answer-hidden">need</span></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: Opposites -->
+    <div class="slide" id="slide6">
+        <h2><i class="fas fa-exchange-alt"></i> Opposites: adjectives</h2>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-brain"></i> Write the opposite</div>
+            <div class="quiz-item"><span class="quiz-text">quiet → </span><button class="btn-reveal" data-answer="noisy">Check</button><span class="answer-hidden">noisy</span></div>
+            <div class="quiz-item"><span class="quiz-text">messy → </span><button class="btn-reveal" data-answer="tidy / neat">Check</button><span class="answer-hidden">tidy / neat</span></div>
+            <div class="quiz-item"><span class="quiz-text">modern → </span><button class="btn-reveal" data-answer="old / traditional">Check</button><span class="answer-hidden">old / traditional</span></div>
+            <div class="quiz-item"><span class="quiz-text">big → </span><button class="btn-reveal" data-answer="small">Check</button><span class="answer-hidden">small</span></div>
+        </div>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-edit"></i> Complete the sentences</div>
+            <div class="quiz-item"><span class="quiz-text">The city centre is noisy, but the suburbs are ______.</span><button class="btn-reveal" data-answer="quiet">Check</button><span class="answer-hidden">quiet</span></div>
+            <div class="quiz-item"><span class="quiz-text">Her room is tidy, while his room is extremely ______.</span><button class="btn-reveal" data-answer="messy">Check</button><span class="answer-hidden">messy</span></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: a/an/some/any/lot -->
+    <div class="slide" id="slide7">
+        <h2><i class="fas fa-spell-check"></i> A, AN, SOME, ANY, LOT</h2>
+        <div class="task-card">
+            <div class="quiz-item"><span class="quiz-text">1. I see ___ eagle in the sky.</span><button class="btn-reveal" data-answer="an">Check</button><span class="answer-hidden">an</span></div>
+            <div class="quiz-item"><span class="quiz-text">2. There is ___ milk in the fridge.</span><button class="btn-reveal" data-answer="some">Check</button><span class="answer-hidden">some</span></div>
+            <div class="quiz-item"><span class="quiz-text">3. There aren't ___ eggs left.</span><button class="btn-reveal" data-answer="any">Check</button><span class="answer-hidden">any</span></div>
+            <div class="quiz-item"><span class="quiz-text">4. Can I have ___ orange?</span><button class="btn-reveal" data-answer="an">Check</button><span class="answer-hidden">an</span></div>
+            <div class="quiz-item"><span class="quiz-text">5. She has ___ lot of friends.</span><button class="btn-reveal" data-answer="a">Check</button><span class="answer-hidden">a</span></div>
+            <div class="quiz-item"><span class="quiz-text">6. They don't have ___ bread.</span><button class="btn-reveal" data-answer="any">Check</button><span class="answer-hidden">any</span></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: Error correction -->
+    <div class="slide" id="slide8">
+        <h2><i class="fas fa-wrench"></i> Error correction & word order</h2>
+        <div class="task-card">
+            <div class="quiz-item"><span class="quiz-text">❌ “There are any good restaurants nearby.” → </span><button class="btn-reveal" data-answer="There are some good restaurants nearby.">Check</button><span class="answer-hidden">There are some good restaurants nearby.</span></div>
+            <div class="quiz-item"><span class="quiz-text">❌ “We need to watch the map carefully.” → </span><button class="btn-reveal" data-answer="We need to look at the map carefully.">Check</button><span class="answer-hidden">We need to look at the map carefully.</span></div>
+            <div class="quiz-item"><span class="quiz-text">❌ “She doesn’t need some help.” → </span><button class="btn-reveal" data-answer="She doesn’t need any help.">Check</button><span class="answer-hidden">She doesn’t need any help.</span></div>
+        </div>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-sort-alpha-down"></i> Put the words in order</div>
+            <div class="quiz-item"><span class="quiz-text">(there / a lot of / are / parks)</span><button class="btn-reveal" data-answer="There are a lot of parks.">Check</button><span class="answer-hidden">There are a lot of parks.</span></div>
+            <div class="quiz-item"><span class="quiz-text">(need / you / to drink / water)</span><button class="btn-reveal" data-answer="You need to drink water.">Check</button><span class="answer-hidden">You need to drink water.</span></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: Final mixed challenge -->
+    <div class="slide" id="slide9">
+        <h2><i class="fas fa-star-of-life"></i> Final challenge</h2>
+        <div class="task-card">
+            <div class="icon-badge"><i class="fas fa-comment-dots"></i> Answer & check sample ideas</div>
+            <div class="quiz-item"><span class="quiz-text">🏡 Describe your dream room using: there is/are, some, a lot of, furniture.</span><button class="btn-reveal" data-answer="Example: There is a big bed and a lot of shelves. There are some armchairs.">Sample</button><span class="answer-hidden">Example: There is a big bed and a lot of shelves. There are some armchairs.</span></div>
+            <div class="quiz-item"><span class="quiz-text">👀 Make sentences with see / look at / watch.</span><button class="btn-reveal" data-answer="I see a plane. Look at the board! I watch news every evening.">Sample</button><span class="answer-hidden">I see a plane. Look at the board! I watch news every evening.</span></div>
+            <div class="quiz-item"><span class="quiz-text">🎒 What do you need to take to a cold country? (3 things + action)</span><button class="btn-reveal" data-answer="I need gloves, a warm coat and boots. I need to drink hot tea.">Sample</button><span class="answer-hidden">I need gloves, a warm coat and boots. I need to drink hot tea.</span></div>
+        </div>
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <i class="fas fa-trophy" style="color: #f59e0b; font-size: 2rem;"></i>
+            <p><strong>Well done! You've completed all tasks!</strong></p>
+        </div>
+    </div>
+</div>
+
+<button class="nav" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+<button class="nav" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+<div class="page-indicator" id="pageIndicator">1 / 11</div>
+
+<script>
+    // Show answer on button click
+    const buttons = document.querySelectorAll('.btn-reveal');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const answerSpan = this.nextElementSibling;
+            if (answerSpan && answerSpan.classList.contains('answer-hidden')) {
+                answerSpan.classList.add('answer-visible');
+                answerSpan.style.display = 'inline-block';
+                this.textContent = 'Hide';
+                // optional: hide again on second click
+                const toggleHide = () => {
+                    answerSpan.classList.remove('answer-visible');
+                    answerSpan.style.display = 'none';
+                    this.textContent = 'Check answer';
+                    this.removeEventListener('click', toggleHide);
+                    // reattach original behavior
+                    this.addEventListener('click', arguments.callee);
+                };
+                this.removeEventListener('click', arguments.callee);
+                this.addEventListener('click', toggleHide);
+            } else if (answerSpan && answerSpan.classList.contains('answer-visible')) {
+                answerSpan.classList.remove('answer-visible');
+                answerSpan.style.display = 'none';
+                this.textContent = 'Check answer';
+            }
+        });
+    });
+
+    // Slider logic
+    const slides = document.querySelectorAll('.slide');
+    let currentIdx = 0;
+    const total = slides.length;
+    const indicator = document.getElementById('pageIndicator');
+    function updateSlides() {
+        slides.forEach((s, i) => {
+            if (i === currentIdx) s.classList.add('active');
+            else s.classList.remove('active');
+        });
+        indicator.innerText = `${currentIdx+1} / ${total}`;
+    }
+    function nextSlide() { if (currentIdx < total-1) currentIdx++; updateSlides(); }
+    function prevSlide() { if (currentIdx > 0) currentIdx--; updateSlides(); }
+    document.getElementById('nextBtn').addEventListener('click', nextSlide);
+    document.getElementById('prevBtn').addEventListener('click', prevSlide);
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') nextSlide();
+        if (e.key === 'ArrowLeft') prevSlide();
+    });
+    updateSlides();
+</script>
+</body>
+</html>
